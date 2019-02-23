@@ -1,2 +1,2 @@
-# vim-100fungo
+# vim-fungo
 100 fungo
