@@ -6,16 +6,32 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 function! fungo#1() abort
-  return 0
+  let str = 'パタトクカシーー'
+  echo join(filter(split(str, '\zs'), {k, v -> k % 2 == 0}), '')
 endfunction
 
 function! fungo#2() abort
-  return 0
+  let str1 = 'パトカー'
+  let str2 = 'タクシー'
+  echo join(map(sort(map(split(str1, '\zs'), {k, v -> [k, v]}) + map(split(str2, '\zs'), {k, v -> [k, v]}), {a1, a2 -> a1[0] - a2[0]}), {k, v -> v[1]}), '')
 endfunction
 
 function! fungo#3() abort
-  let l:str = 'Now I need a drink, alcoholic of course, after the heavy lectures involving quantum mechanics.'
+  let str = 'Now I need a drink, alcoholic of course, after the heavy lectures involving quantum mechanics.'
   echo map(split(str, '\( \|\.\|,\)\+'), {k, v -> len(v)})
+endfunction
+
+function! fungo#4() abort
+  let str = 'Hi He Lied Because Boron Could Not Oxidize Fluorine. New Nations Might Also Sign Peace Security Clause. Arthur King Can.'
+  let targets = [1, 5, 6, 7, 8, 9, 15, 16, 19]
+  " REF: :h byteidx()
+  echo map(split(str, '\( \|\.\)\+'), {k, v -> index(targets, k+1) < 0 ? v[:1] : v[:0]})
+endfunction
+
+" REF: http://d.hatena.ne.jp/kangar/20100608/1275983429
+" it right?
+function! fungo#5() abort
+  return 0
 endfunction
 
 let &cpo = s:save_cpo
