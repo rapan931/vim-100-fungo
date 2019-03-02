@@ -29,9 +29,32 @@ function! fungo#4() abort
 endfunction
 
 " REF: http://d.hatena.ne.jp/kangar/20100608/1275983429
-" it right?
+" skip
 function! fungo#5() abort
-  return 0
+  echo 'skip'
+endfunction
+
+" skip
+function! fungo#6() abort
+  echo 'skip'
+endfunction
+
+function! fungo#7(x, y, z) abort
+  echo printf('%d時の%sは%.1f', a:x, a:y, a:z)
+endfunction
+
+function! fungo#8_encode(str) abort
+  echo join(map(split(a:str, '\zs'), {k, v -> v =~ '[a-z]' ? nr2char(219 - char2nr(v)) : v}), '')
+  " return join(map(split(a:str, '\zs'), {k, v -> v =~ '[a-z]' ? nr2char(219 - char2nr(v)) : v}), '')
+endfunction
+
+function! fungo#8_decode(str) abort
+  echo join(map(split(a:str, '\zs'), {k, v -> nr2char(219 - char2nr(v)) =~ '[a-z]' ? nr2char(219 - char2nr(v)) : v}), '')
+endfunction
+
+" https://programming-place.net/ppp/contents/algorithm/other/002.html
+function! fungo#9(str) abort
+  echo join(map(split(a:str, '\zs'), {k, v -> nr2char(219 - char2nr(v)) =~ '[a-z]' ? nr2char(219 - char2nr(v)) : v}), '')
 endfunction
 
 let &cpo = s:save_cpo
