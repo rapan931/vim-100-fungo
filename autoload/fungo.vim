@@ -5,7 +5,12 @@ scriptencoding utf-8
 let s:save_cpo = &cpo
 set cpo&vim
 
+let s:fungo_vim_file_path = expand('%:p')
+let s:hightemp_txt_file_path = expand('%:p:h:h') . '/t/hightemp.txt'
+let s:t_dir_path = expand('%:p:h:h') . '/t'
+
 function! fungo#1() abort
+  " let str = "ぱたとくかしーー"
   let str = 'パタトクカシーー'
   echo join(filter(split(str, '\zs'), {k, v -> k % 2 == 0}), '')
 endfunction
@@ -52,9 +57,50 @@ function! fungo#8_decode(str) abort
   echo join(map(split(a:str, '\zs'), {k, v -> nr2char(219 - char2nr(v)) =~ '[a-z]' ? nr2char(219 - char2nr(v)) : v}), '')
 endfunction
 
-" https://programming-place.net/ppp/contents/algorithm/other/002.html
-function! fungo#9(str) abort
-  echo join(map(split(a:str, '\zs'), {k, v -> nr2char(219 - char2nr(v)) =~ '[a-z]' ? nr2char(219 - char2nr(v)) : v}), '')
+function! fungo#9() abort
+  let str = "I couldn't believe that I could actually understand what I was reading : the phenomenal power of the human mind ."
+  echo join(map(split(str, ' '), {k, v -> len(v) > 4 ? v[0] . fungo#util#shuffle(v[1:-2]) . v[len(v) - 1]  : v}), ' ')
+endfunction
+
+function! fungo#10() abort
+  echo len(readfile(s:hightemp_txt_file_path))
+endfunction
+
+function! fungo#11() abort
+  try
+    let save_enc = &l:encoding
+    setlocal encoding=utf-8
+
+    " call writefile(map(readfile(s:hightemp_txt_file_path), {k, v -> substitute(v, '\t', ' ', "g")}), s:t_dir_path . '/hightemp11.txt')
+    echo join(map(readfile(s:hightemp_txt_file_path), {k, v -> v}), "\n")
+
+  finally
+    let &l:encoding = save_enc
+  endtry
+endfunction
+
+function! fungo#12() abort
+  try
+    let save_enc = &l:encoding
+    setlocal encoding=utf-8
+
+    let col1s = map(map(readfile(s:hightemp_txt_file_path), {k, v -> split(v, '\t')}), {k, v -> v[0]})
+    let col2s = map(map(readfile(s:hightemp_txt_file_path), {k, v -> split(v, '\t')}), {k, v -> v[1]})
+
+    call writefile(col1s, s:t_dir_path . '/col1.txt')
+    call writefile(col2s, s:t_dir_path . '/col2.txt')
+  finally
+    let &l:encoding = save_enc
+  endtry
+endfunction
+
+function! fungo#13() abort
+  let col1s = readfile(s:t_dir_path . '/col1.txt')
+  let col2s = readfile(s:t_dir_path . '/col2.txt')
+  " echo join(fungo#util#zip(col1s, col2s), "\n")
+  " call  fungo#util#zip(col1s, col2s)
+  " echo  len(fungo#util#zip(col1s, col2s))
+    call writefile(map(fungo#util#zip(col1s, col2s), {k, v -> join(v, "\t")}), s:t_dir_path . '/hightemp13.txt')
 endfunction
 
 let &cpo = s:save_cpo
