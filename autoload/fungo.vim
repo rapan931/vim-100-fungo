@@ -5,8 +5,9 @@ scriptencoding utf-8
 let s:save_cpo = &cpo
 set cpo&vim
 
-let s:fungo_vim_file_path = expand('%:p')
-let s:hightemp_txt_file_path = expand('%:p:h:h') . '/t/hightemp.txt'
+let s:hightemp_file_path = expand('%:p:h:h') . '/t/hightemp.txt'
+
+" let g:t_dir_path = get(g:, 'fungo_output_dir', expand('%:p:h:h') . '/t')
 let s:t_dir_path = expand('%:p:h:h') . '/t'
 
 function! fungo#1() abort
@@ -18,7 +19,9 @@ endfunction
 function! fungo#2() abort
   let str1 = 'パトカー'
   let str2 = 'タクシー'
-  echo join(map(sort(map(split(str1, '\zs'), {k, v -> [k, v]}) + map(split(str2, '\zs'), {k, v -> [k, v]}), {a1, a2 -> a1[0] - a2[0]}), {k, v -> v[1]}), '')
+  let str1_and_str2 = map(split(str1, '\zs'), {k, v -> [k, v]}) + map(split(str2, '\zs'), {k, v -> [k, v]})
+
+  echo join(map(sort(str1_and_str2, {a1, a2 -> a1[0] == a2[0] ? 0 : a1[0] > a2[0] ? 1 : -1}), {k, v -> v[1]}), '')
 endfunction
 
 function! fungo#3() abort
@@ -34,13 +37,13 @@ function! fungo#4() abort
 endfunction
 
 " REF: http://d.hatena.ne.jp/kangar/20100608/1275983429
-" skip
 function! fungo#5() abort
+  " 回答が何になるのか理解できていない
   echo 'skip'
 endfunction
 
-" skip
 function! fungo#6() abort
+  " 回答が何になるのか理解できていない
   echo 'skip'
 endfunction
 
@@ -63,44 +66,87 @@ function! fungo#9() abort
 endfunction
 
 function! fungo#10() abort
-  echo len(readfile(s:hightemp_txt_file_path))
+  echo len(readfile(s:hightemp_file_path))
 endfunction
 
 function! fungo#11() abort
-  try
-    let save_enc = &l:encoding
-    setlocal encoding=utf-8
-
-    " call writefile(map(readfile(s:hightemp_txt_file_path), {k, v -> substitute(v, '\t', ' ', "g")}), s:t_dir_path . '/hightemp11.txt')
-    echo join(map(readfile(s:hightemp_txt_file_path), {k, v -> v}), "\n")
-
-  finally
-    let &l:encoding = save_enc
-  endtry
+  echo join(map(readfile(s:hightemp_file_path), {k, v -> fungo#util#conv_my_enc(v)}), "\n")
 endfunction
 
 function! fungo#12() abort
-  try
-    let save_enc = &l:encoding
-    setlocal encoding=utf-8
+  let col1s = map(map(readfile(s:hightemp_file_path), {k, v -> split(fungo#util#conv_my_enc(v), '\t')}), {k, v -> v[0]})
+  let col2s = map(map(readfile(s:hightemp_file_path), {k, v -> split(fungo#util#conv_my_enc(v), '\t')}), {k, v -> v[1]})
 
-    let col1s = map(map(readfile(s:hightemp_txt_file_path), {k, v -> split(v, '\t')}), {k, v -> v[0]})
-    let col2s = map(map(readfile(s:hightemp_txt_file_path), {k, v -> split(v, '\t')}), {k, v -> v[1]})
-
-    call writefile(col1s, s:t_dir_path . '/col1.txt')
-    call writefile(col2s, s:t_dir_path . '/col2.txt')
-  finally
-    let &l:encoding = save_enc
-  endtry
+  call writefile(map(col1s, {k, v -> fungo#util#conv_utf8(v)}), s:t_dir_path . '/col1.txt')
+  call writefile(map(col2s, {k, v -> fungo#util#conv_utf8(v)}), s:t_dir_path . '/col2.txt')
 endfunction
 
 function! fungo#13() abort
   let col1s = readfile(s:t_dir_path . '/col1.txt')
   let col2s = readfile(s:t_dir_path . '/col2.txt')
-  " echo join(fungo#util#zip(col1s, col2s), "\n")
-  " call  fungo#util#zip(col1s, col2s)
-  " echo  len(fungo#util#zip(col1s, col2s))
-    call writefile(map(fungo#util#zip(col1s, col2s), {k, v -> join(v, "\t")}), s:t_dir_path . '/hightemp13.txt')
+  " TODO: check encoding
+  call writefile(map(fungo#util#zip(col1s, col2s), {k, v -> fungo#util#conv_utf8(join(v, "\t"))}), s:t_dir_path . '/13.txt')
+endfunction
+
+function! fungo#14(num) abort
+  let rows = readfile(s:hightemp_file_path)
+
+  if (a:num < 1)  || (len(rows) < a:num)
+    echohl ErrorMsg | echo 'invalid!' | echohl none
+    return
+  endif
+
+  for i in range(a:num)
+    echo fungo#util#conv_my_enc(rows[i])
+  endfor
+endfunction
+
+function! fungo#15(num) abort
+  let rows = readfile(s:hightemp_file_path)
+  let row_count = len(rows)
+
+  if (a:num < 1)  || (row_count < a:num)
+    echohl ErrorMsg | echo 'invalid!' | echohl none
+    return
+  endif
+
+  for i in range(row_count - a:num + 1, row_count)
+    echo fungo#util#conv_my_enc(rows[i])
+  endfor
+endfunction
+
+function! fungo#16(num) abort
+  let alpha = 0x61 " "a" == 0x61
+  let each_rows = fungo#util#each_slice(readfile(s:hightemp_file_path), a:num)
+
+  for i in range(len(each_rows))
+    call writefile(each_rows[i], s:t_dir_path . '/16_' . nr2char(alpha + i))
+  endfor
+endfunction
+
+function! fungo#17() abort
+  let rows = readfile(s:hightemp_file_path)
+  echo uniq(sort(map(rows, {k, v -> split(fungo#util#conv_my_enc(v), '\t')[0]})))
+endfunction
+
+function! fungo#18() abort
+  let rows =  map(readfile(s:hightemp_file_path), {k, v -> [fungo#util#conv_my_enc(v), split(fungo#util#conv_my_enc(v), '\t')[2]]})
+  let rows = sort(rows, {a1, a2 -> str2float(a1[1][2]) == str2float(a2[1][2]) ? 0 : str2float(a1[1][2]) < str2float(a2[1][2]) ? 1 : -1})
+  echo join(map(rows, {k, v -> v[0]}), "\n")
+endfunction
+
+function! fungo#19() abort
+  let col1s =  map(readfile(s:hightemp_file_path), {k, v -> split(fungo#util#conv_my_enc(v), '\t')[0]})
+  let dict = {}
+  for v in col1s
+    let dict[v] = has_key(dict, v) ? dict[v] + 1 : 1
+  endfor
+
+  let tmp = []
+  for k_v in items(dict)
+    call add(tmp, k_v)
+  endfor
+  echo join(map(sort(tmp, {a1, a2 -> a2[1] - a1[1]}), {k, v -> v[0]}), "\n")
 endfunction
 
 let &cpo = s:save_cpo

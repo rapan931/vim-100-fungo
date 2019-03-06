@@ -1,5 +1,6 @@
 " https://programming-place.net/ppp/contents/algorithm/other/002.html
 " https://vim-jp.org/vim-users-jp/2009/11/05/Hack-98.html
+" specified String or List
 function! fungo#util#shuffle(obj) abort
   if type(a:obj) == v:t_string
     return join(fungo#util#shuffle_list(split(a:obj, '\zs')), '')
@@ -30,3 +31,23 @@ function! fungo#util#zip(list1, list2) abort
   return ret
 endfunction
 
+function! fungo#util#conv_utf8(str) abort
+  return iconv(a:str, &encoding, 'utf-8')
+endfunction
+
+function! fungo#util#conv_my_enc(str) abort
+  return iconv(a:str, 'utf-8', &encoding)
+endfunction
+
+function! fungo#util#each_slice(list, num) abort
+  let ret = []
+  if 0 == a:num
+    return []
+  endif
+
+  let roop_count = len(a:list) / a:num + (len(a:list) % a:num == 0 ? 0 : 1)
+  for i in range(roop_count)
+    call add(ret, a:list[i * a:num : i * a:num + a:num - 1])
+  endfor
+  return ret
+endfunction
