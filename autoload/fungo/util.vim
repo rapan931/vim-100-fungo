@@ -1,6 +1,11 @@
 " https://programming-place.net/ppp/contents/algorithm/other/002.html
 " https://vim-jp.org/vim-users-jp/2009/11/05/Hack-98.html
 " specified String or List
+scriptencoding utf-8
+
+let s:save_cpo = &cpo
+set cpo&vim
+
 function! fungo#util#shuffle(obj) abort
   if type(a:obj) == v:t_string
     return join(fungo#util#shuffle_list(split(a:obj, '\zs')), '')
@@ -51,3 +56,16 @@ function! fungo#util#each_slice(list, num) abort
   endfor
   return ret
 endfunction
+
+function! fungo#util#englad_text(path) abort
+  let rows = readfile(a:path)
+  for i in range(len(rows))
+    if json_decode(rows[i])['title'] == 'イギリス'
+      return json_decode(rows[i])['text']
+    endif
+  endfor
+  return 'none'
+endfunction
+
+let &cpo = s:save_cpo
+unlet s:save_cpo

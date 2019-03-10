@@ -1,11 +1,13 @@
 " REF: http://www.cl.ecei.tohoku.ac.jp/nlp100/
+" "hogehog
 
 scriptencoding utf-8
 
 let s:save_cpo = &cpo
 set cpo&vim
 
-let s:hightemp_file_path = expand('%:p:h:h') . '/t/hightemp.txt'
+let s:hightemp_file_path = expand('<sfile>:h:h') . '/t/hightemp.txt'
+let s:jawiki_file_path = expand('<sfile>:h:h') . '/t/jawiki-country.json'
 
 " let g:t_dir_path = get(g:, 'fungo_output_dir', expand('%:p:h:h') . '/t')
 let s:t_dir_path = expand('%:p:h:h') . '/t'
@@ -149,5 +151,32 @@ function! fungo#19() abort
   echo join(map(sort(tmp, {a1, a2 -> a2[1] - a1[1]}), {k, v -> v[0]}), "\n")
 endfunction
 
+function! s:json_decode() abort
+endfunction
+
+function! fungo#20() abort
+  echo fungo#util#englad_text(s:jawiki_file_path)
+endfunction
+
+" [[Category:xxxxxxx]]
+function! fungo#21() abort
+  let str = fungo#util#englad_text(s:jawiki_file_path)
+  call substitute(str, 'Category:\(.\{-\}\)\ze\]', {m -> execute('echo m[1]', "")}, 'g')
+endfunction
+
+" \n====xxxxx====\n
+function! fungo#22() abort
+  " let str = fungo#util#englad_text(s:jawiki_file_path)
+  " call substitute(str, '\n\zs=\{-\}\([^=]\{-\}\)=*\ze\n', {m -> execute('echo m[1]', "")}, 'g')
+endfunction
+
+function! fungo#23() abort
+  
+endfunction
+
 let &cpo = s:save_cpo
 unlet s:save_cpo
+
+" NOTE:
+" [] + [] => []
+" add([], []) => [[]]
