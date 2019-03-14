@@ -64,6 +64,7 @@ endfunction
 
 function! fungo#9() abort
   let str = "I couldn't believe that I could actually understand what I was reading : the phenomenal power of the human mind ."
+  echo str
   echo join(map(split(str, ' '), {k, v -> len(v) > 4 ? v[0] . fungo#util#shuffle(v[1:-2]) . v[len(v) - 1]  : v}), ' ')
 endfunction
 
@@ -86,7 +87,6 @@ endfunction
 function! fungo#13() abort
   let col1s = readfile(s:t_dir_path . '/col1.txt')
   let col2s = readfile(s:t_dir_path . '/col2.txt')
-  " TODO: check encoding
   call writefile(map(fungo#util#zip(col1s, col2s), {k, v -> fungo#util#conv_utf8(join(v, "\t"))}), s:t_dir_path . '/13.txt')
 endfunction
 
@@ -151,9 +151,6 @@ function! fungo#19() abort
   echo join(map(sort(tmp, {a1, a2 -> a2[1] - a1[1]}), {k, v -> v[0]}), "\n")
 endfunction
 
-function! s:json_decode() abort
-endfunction
-
 function! fungo#20() abort
   echo fungo#util#englad_text(s:jawiki_file_path)
 endfunction
@@ -171,7 +168,20 @@ function! fungo#22() abort
 endfunction
 
 function! fungo#23() abort
-  
+  echo 'skip'
+endfunction
+
+function! fungo#other_sintyoku() abort
+  let s:str = '進捗どうですか'
+  let s:list = split(s:str, '\zs')
+  echo s:str
+  echo join(reverse(split(s:str, '\zs')), '')
+  echo join(map(split(s:str, '\zs'), {k, v -> repeat(' ', k) . v}), "\n")
+  echo join(map(range(len(s:list)), {k -> join(s:list[k:], '') . join(s:list[:-len(s:list) - 1 + k], '')}), "\n")
+  " echo call({f, n -> f(f, n)}, [{f, n -> n < len(s:list) ? repeat(n * f(f, n + 1), ' ') . s:list[n - 1] : 1}, 1])
+  " call({f, n -> f(f, n)}, [{f, n -> n < len(s:list) ? execute('echo ' .  n * f(f, n + 1)) : 1}, 1])
+
+  echo call({f,n->f(f,n)}, [{f, n -> n > 0  ? execute('echo ' . n * f(f, n - 1)) : 1}, 3])
 endfunction
 
 let &cpo = s:save_cpo

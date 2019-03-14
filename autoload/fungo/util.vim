@@ -1,5 +1,6 @@
 " https://programming-place.net/ppp/contents/algorithm/other/002.html
-" https://vim-jp.org/vim-users-jp/2009/11/05/Hack-98.html
+" https://qiita.com/mattn/items/500e124ba26fa66b2624
+" http://www.tatsuya-koyama.com/note/program001.html
 " specified String or List
 scriptencoding utf-8
 
@@ -8,15 +9,16 @@ set cpo&vim
 
 function! fungo#util#shuffle(obj) abort
   if type(a:obj) == v:t_string
-    return join(fungo#util#shuffle_list(split(a:obj, '\zs')), '')
+    return join(fungo#util#shuffle(split(a:obj, '\zs')), '')
   else
     let len = len(a:obj)
+    call s:srand(localtime())
+
     for i in range(len)
       let i1 = len - i - 1
       let v1 = a:obj[i1]
 
-      let t = reltimestr(reltime())
-      let i2 = t[matchend(t, '\d\+\.'):] % (len - i)
+      let i2 = s:rand() % (len - i)
       let v2 = a:obj[i2]
 
       let a:obj[i1] = v2
@@ -24,6 +26,16 @@ function! fungo#util#shuffle(obj) abort
     endfor
     return a:obj
   endif
+endfunction
+
+let s:seed = 0
+function! s:srand(seed) abort
+  let s:seed = a:seed
+endfunction
+
+function! s:rand() abort
+  let s:seed = s:seed * 214013 + 2531011
+  return (s:seed < 0 ? s:seed - 0x80000000 : s:seed) / 0x10000 % 0x8000
 endfunction
 
 function! fungo#util#zip(list1, list2) abort
