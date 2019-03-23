@@ -1,16 +1,14 @@
 " REF: http://www.cl.ecei.tohoku.ac.jp/nlp100/
-" "hogehog
 
 scriptencoding utf-8
 
 let s:save_cpo = &cpo
 set cpo&vim
 
-let s:hightemp_file_path = expand('<sfile>:h:h') . '/t/hightemp.txt'
-let s:jawiki_file_path = expand('<sfile>:h:h') . '/t/jawiki-country.json'
+let g:fungo_hightemp_path = get(g:, 'fungo_hightemp_path', '')
+let g:fungo_jawiki_path = get(g:, 'fungo_jawiki_path', '')
 
-" let g:t_dir_path = get(g:, 'fungo_output_dir', expand('%:p:h:h') . '/t')
-let s:t_dir_path = expand('%:p:h:h') . '/t'
+let s:t_dir_path = expand('<sfile>:h:h') . '/t'
 
 function! fungo#1() abort
   " let str = "ぱたとくかしーー"
@@ -69,16 +67,16 @@ function! fungo#9() abort
 endfunction
 
 function! fungo#10() abort
-  echo len(readfile(s:hightemp_file_path))
+  echo len(readfile(g:fungo_hightemp_path))
 endfunction
 
 function! fungo#11() abort
-  echo join(map(readfile(s:hightemp_file_path), {k, v -> fungo#util#conv_my_enc(v)}), "\n")
+  echo join(map(readfile(g:fungo_hightemp_path), {k, v -> fungo#util#conv_my_enc(v)}), "\n")
 endfunction
 
 function! fungo#12() abort
-  let col1s = map(map(readfile(s:hightemp_file_path), {k, v -> split(fungo#util#conv_my_enc(v), '\t')}), {k, v -> v[0]})
-  let col2s = map(map(readfile(s:hightemp_file_path), {k, v -> split(fungo#util#conv_my_enc(v), '\t')}), {k, v -> v[1]})
+  let col1s = map(map(readfile(g:fungo_hightemp_path), {k, v -> split(fungo#util#conv_my_enc(v), '\t')}), {k, v -> v[0]})
+  let col2s = map(map(readfile(g:fungo_hightemp_path), {k, v -> split(fungo#util#conv_my_enc(v), '\t')}), {k, v -> v[1]})
 
   call writefile(map(col1s, {k, v -> fungo#util#conv_utf8(v)}), s:t_dir_path . '/col1.txt')
   call writefile(map(col2s, {k, v -> fungo#util#conv_utf8(v)}), s:t_dir_path . '/col2.txt')
@@ -87,11 +85,11 @@ endfunction
 function! fungo#13() abort
   let col1s = readfile(s:t_dir_path . '/col1.txt')
   let col2s = readfile(s:t_dir_path . '/col2.txt')
-  call writefile(map(fungo#util#zip(col1s, col2s), {k, v -> fungo#util#conv_utf8(join(v, "\t"))}), s:t_dir_path . '/13.txt')
+  call writefile(map(fungo#util#zip(col1s, col2s), {k, v -> fungo#util#conv_utf8(fungo#util#conv_my_enc(join(v, "\t")))}), s:t_dir_path . '/13.txt')
 endfunction
 
 function! fungo#14(num) abort
-  let rows = readfile(s:hightemp_file_path)
+  let rows = readfile(g:fungo_hightemp_path)
 
   if (a:num < 1)  || (len(rows) < a:num)
     echohl ErrorMsg | echo 'invalid!' | echohl none
@@ -104,7 +102,7 @@ function! fungo#14(num) abort
 endfunction
 
 function! fungo#15(num) abort
-  let rows = readfile(s:hightemp_file_path)
+  let rows = readfile(g:fungo_hightemp_path)
   let row_count = len(rows)
 
   if (a:num < 1)  || (row_count < a:num)
@@ -119,7 +117,7 @@ endfunction
 
 function! fungo#16(num) abort
   let alpha = 0x61 " "a" == 0x61
-  let each_rows = fungo#util#each_slice(readfile(s:hightemp_file_path), a:num)
+  let each_rows = fungo#util#each_slice(readfile(g:fungo_hightemp_path), a:num)
 
   for i in range(len(each_rows))
     call writefile(each_rows[i], s:t_dir_path . '/16_' . nr2char(alpha + i))
@@ -127,18 +125,18 @@ function! fungo#16(num) abort
 endfunction
 
 function! fungo#17() abort
-  let rows = readfile(s:hightemp_file_path)
+  let rows = readfile(g:fungo_hightemp_path)
   echo uniq(sort(map(rows, {k, v -> split(fungo#util#conv_my_enc(v), '\t')[0]})))
 endfunction
 
 function! fungo#18() abort
-  let rows =  map(readfile(s:hightemp_file_path), {k, v -> [fungo#util#conv_my_enc(v), split(fungo#util#conv_my_enc(v), '\t')[2]]})
+  let rows =  map(readfile(g:fungo_hightemp_path), {k, v -> [fungo#util#conv_my_enc(v), split(fungo#util#conv_my_enc(v), '\t')[2]]})
   let rows = sort(rows, {a1, a2 -> str2float(a1[1][2]) == str2float(a2[1][2]) ? 0 : str2float(a1[1][2]) < str2float(a2[1][2]) ? 1 : -1})
   echo join(map(rows, {k, v -> v[0]}), "\n")
 endfunction
 
 function! fungo#19() abort
-  let col1s =  map(readfile(s:hightemp_file_path), {k, v -> split(fungo#util#conv_my_enc(v), '\t')[0]})
+  let col1s =  map(readfile(g:fungo_hightemp_path), {k, v -> split(fungo#util#conv_my_enc(v), '\t')[0]})
   let dict = {}
   for v in col1s
     let dict[v] = has_key(dict, v) ? dict[v] + 1 : 1
@@ -152,23 +150,61 @@ function! fungo#19() abort
 endfunction
 
 function! fungo#20() abort
-  echo fungo#util#englad_text(s:jawiki_file_path)
+  echo fungo#util#englad_text(g:fungo_jawiki_path)
 endfunction
 
 " [[Category:xxxxxxx]]
 function! fungo#21() abort
-  let str = fungo#util#englad_text(s:jawiki_file_path)
+  let str = fungo#util#englad_text(g:fungo_jawiki_path)
+  call substitute(str, '\(^\|\n\)\zs[^\n]\{-\}\[Category:.\+\][^\n]\{-\}\ze\(\n\|$\)', {m -> execute('echo m[0]', "")}, 'g')
+endfunction
+
+" [[Category:xxxxxxx]] の xxxxxxxだけ
+function! fungo#22() abort
+  let str = fungo#util#englad_text(g:fungo_jawiki_path)
   call substitute(str, 'Category:\(.\{-\}\)\ze\]', {m -> execute('echo m[1]', "")}, 'g')
 endfunction
 
 " \n====xxxxx====\n
-function! fungo#22() abort
-  " let str = fungo#util#englad_text(s:jawiki_file_path)
-  " call substitute(str, '\n\zs=\{-\}\([^=]\{-\}\)=*\ze\n', {m -> execute('echo m[1]', "")}, 'g')
+function! fungo#23() abort
+  " 他PCでコミットしていないけど実装済みなはずなので、
 endfunction
 
-function! fungo#23() abort
-  echo 'skip'
+" メディアフィアル is 何？
+" [[ファイル:Wikipedia-logo-v2-ja.png|thumb|説明文]]
+" https://ja.wikipedia.org/wiki/Help:%E6%97%A9%E8%A6%8B%E8%A1%A8
+" https://qiita.com/segavvy/items/03b97eb6a39f5ae6aa34
+function! fungo#24() abort
+  let str = fungo#util#englad_text(g:fungo_jawiki_path)
+  call substitute(str, '\[\[\(file\|ファイル\):\zs\([^|]\{-\}\)\ze|', {m -> execute('echo m[0]', '')}, 'g')
+endfunction
+
+function! fungo#25() abort
+  let str = fungo#util#englad_text(g:fungo_jawiki_path)
+  let dir = {}
+  call substitute(str, '{{\s*基礎情報[^|]*|\zs\(.\{-\}\)\s*=\s*\(.\{-\}\)\ze\(|\|}}\)', {m -> execute('echo m[0]', '')}, 'g')
+endfunction
+
+function! fungo#all() abort
+  let i = 1
+  while 1
+    if exists('*fungo#' . i)
+      echo '-- No.' . i . ' --'
+      try
+        call fungo#{i}()
+      catch /^Vim\%((\a\+)\)\=:E119\>/
+        echo 'skip fungo#' . i
+      endtry
+
+      echo ' '
+    else
+      if i != 8
+        break
+      endif
+    endif
+
+    let i += 1
+  endwhile
 endfunction
 
 function! fungo#other_sintyoku() abort
