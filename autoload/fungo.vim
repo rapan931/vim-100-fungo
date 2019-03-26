@@ -162,12 +162,15 @@ endfunction
 " [[Category:xxxxxxx]] の xxxxxxxだけ
 function! fungo#22() abort
   let str = fungo#util#englad_text(g:fungo_jawiki_path)
-  call substitute(str, 'Category:\(.\{-\}\)\ze\]', {m -> execute('echo m[1]', "")}, 'g')
+  call substitute(str, '\[\[Category:\(.\{-\}\)\ze\]\]', {m -> execute('echo m[1]', "")}, 'g')
 endfunction
 
 " \n====xxxxx====\n
+" "== セクション名 ==" ならレベル2(?)にする(問題がおかしい？)
 function! fungo#23() abort
-  " 他PCでコミットしていないけど実装済みなはずなので、
+  let str = fungo#util#englad_text(s:jawiki_file_path)
+  " call substitute(str, '\n\zs=\{-\}\([^=]\{-\}\)=*\ze\n', {m -> execute('echo m[1]', "")}, 'g')
+  call substitute(str, '\n\zs\(=\+\)\([^=]\+\)\(=\+\)\ze\n', {m -> execute('echo "レベル:" . len(m[1]) m[2]', "")}, 'g')
 endfunction
 
 " メディアフィアル is 何？
