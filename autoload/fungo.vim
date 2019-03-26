@@ -169,7 +169,6 @@ endfunction
 " "== セクション名 ==" ならレベル2(?)にする(問題がおかしい？)
 function! fungo#23() abort
   let str = fungo#util#englad_text(s:jawiki_file_path)
-  " call substitute(str, '\n\zs=\{-\}\([^=]\{-\}\)=*\ze\n', {m -> execute('echo m[1]', "")}, 'g')
   call substitute(str, '\n\zs\(=\+\)\([^=]\+\)\(=\+\)\ze\n', {m -> execute('echo "レベル:" . len(m[1]) m[2]', "")}, 'g')
 endfunction
 
