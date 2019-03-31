@@ -182,9 +182,16 @@ function! fungo#24() abort
 endfunction
 
 function! fungo#25() abort
+  let s:n = 0
+  let s:a = []
+  let s:d = {}
   let str = fungo#util#englad_text(g:fungo_jawiki_path)
-  let dir = {}
-  call substitute(str, '{{\s*基礎情報[^|]*|\zs\(.\{-\}\)\s*=\s*\(.\{-\}\)\ze\(|\|}}\)', {m -> execute('echo m[0]', '')}, 'g')
+  call substitute(str, '\n{{\s*基礎情報.\{-\}\n\zs.\{-\}\ze\n}}', {m -> substitute(m[0], '\(\n\|^\)|\zs.\{-\}\ze\(\n|\|$\)', {m2 -> substitute(m2[0], '^\(.\{-\}\)\s\+=\s\+\(.\+\)\s*$', {m3 -> execute('call add(s:a, m3[1]) | let s:d[m3[1]] = m3[2] | let s:n += 1', '')}, 'g')}, 'g')}, 'g')
+  for k in s:a
+    echo '-------'
+    echo 'key: ' k
+    echo 'value: ' s:d[k]
+  endfor
 endfunction
 
 function! fungo#all() abort
