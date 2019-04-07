@@ -7,7 +7,6 @@ set cpo&vim
 
 let g:fungo_hightemp_path = get(g:, 'fungo_hightemp_path', '')
 let g:fungo_jawiki_path = get(g:, 'fungo_jawiki_path', '')
-
 let s:t_dir_path = expand('<sfile>:h:h') . '/t'
 
 function! fungo#1() abort
@@ -150,25 +149,25 @@ function! fungo#19() abort
 endfunction
 
 function! fungo#20() abort
-  echo fungo#util#englad_text(g:fungo_jawiki_path)
+  echo fungo#util#jawiki_englad_text(g:fungo_jawiki_path)
 endfunction
 
 " [[Category:xxxxxxx]]
 function! fungo#21() abort
-  let str = fungo#util#englad_text(g:fungo_jawiki_path)
+  let str = fungo#util#jawiki_englad_text(g:fungo_jawiki_path)
   call substitute(str, '\(^\|\n\)\zs[^\n]\{-\}\[Category:.\+\][^\n]\{-\}\ze\(\n\|$\)', {m -> execute('echo m[0]', "")}, 'g')
 endfunction
 
 " [[Category:xxxxxxx]] の xxxxxxxだけ
 function! fungo#22() abort
-  let str = fungo#util#englad_text(g:fungo_jawiki_path)
+  let str = fungo#util#jawiki_englad_text(g:fungo_jawiki_path)
   call substitute(str, '\[\[Category:\(.\{-\}\)\ze\]\]', {m -> execute('echo m[1]', "")}, 'g')
 endfunction
 
 " \n====xxxxx====\n
 " "== セクション名 ==" ならレベル2(?)にする(問題がおかしい？)
 function! fungo#23() abort
-  let str = fungo#util#englad_text(s:jawiki_file_path)
+  let str = fungo#util#jawiki_englad_text(s:jawiki_file_path)
   call substitute(str, '\n\zs\(=\+\)\([^=]\+\)\(=\+\)\ze\n', {m -> execute('echo "レベル:" . len(m[1]) m[2]', "")}, 'g')
 endfunction
 
@@ -177,21 +176,71 @@ endfunction
 " https://ja.wikipedia.org/wiki/Help:%E6%97%A9%E8%A6%8B%E8%A1%A8
 " https://qiita.com/segavvy/items/03b97eb6a39f5ae6aa34
 function! fungo#24() abort
-  let str = fungo#util#englad_text(g:fungo_jawiki_path)
+  let str = fungo#util#jawiki_englad_text(g:fungo_jawiki_path)
   call substitute(str, '\[\[\(file\|ファイル\):\zs\([^|]\{-\}\)\ze|', {m -> execute('echo m[0]', '')}, 'g')
 endfunction
 
 function! fungo#25() abort
-  let s:n = 0
-  let s:a = []
-  let s:d = {}
-  let str = fungo#util#englad_text(g:fungo_jawiki_path)
-  call substitute(str, '\n{{\s*基礎情報.\{-\}\n\zs.\{-\}\ze\n}}', {m -> substitute(m[0], '\(\n\|^\)|\zs.\{-\}\ze\(\n|\|$\)', {m2 -> substitute(m2[0], '^\(.\{-\}\)\s\+=\s\+\(.\+\)\s*$', {m3 -> execute('call add(s:a, m3[1]) | let s:d[m3[1]] = m3[2] | let s:n += 1', '')}, 'g')}, 'g')}, 'g')
-  for k in s:a
+  let [dir, list] = fungo#util#jawiki_kihonjouhou()
+  for k in list
     echo '-------'
     echo 'key: ' k
-    echo 'value: ' s:d[k]
+    echo 'value: ' dir[k]
   endfor
+endfunction
+
+" ````hogehgoe````
+" ```hogehgoe```
+" ``hogehgoe``
+" ↓
+" hogehgoe
+" hogehgoe
+" hogehgoe
+function! fungo#26() abort
+  let [dir, list] = fungo#util#jawiki_kihonjouhou()
+  for [k, v] in items(dir)
+    let dir[k] = substitute(v, '\(''\{4\}\|''\{3\}\|''\{2\}\)\(.\{-\}\)\(''\{4\}\|''\{3\}\|''\{2\}\)', '\2', 'g')
+  endfor
+  " for k in list
+  "   echo '-------'
+  "   echo 'key: ' k
+  "   echo 'value: ' dir[k]
+  " endfor
+  echo dir
+endfunction
+
+" [[hoge1]]
+" [[hoge2|hoge3]]
+" [[Category:hoge4]]
+" [[ファイル:hoge5]]
+" ↓
+" hoge1
+" hoge3
+" [[Category:hoge4]]
+" [[ファイル:hoge5]]
+function! fungo#27() abort
+  let [dir, list] = fungo#util#jawiki_kihonjouhou()
+  for [k, v] in items(dir)
+    let str = substitute(v, '\(''\{4\}\|''\{3\}\|''\{2\}\)\(.\{-\}\)\(''\{4\}\|''\{3\}\|''\{2\}\)', '\2', 'g')
+    let dir[k] = substitute(str, '\[\[\(Category:\|ファイル:\)\@!\(.*|\(.\{-\}\)\|\(.\{-\}\)\)\]\]', '\3\4', 'g')
+  endfor
+  for k in list
+    echo '-------'
+    echo 'key: ' k
+    echo 'value: ' dir[k]
+  endfor
+  " echo dir
+endfunction
+
+
+" ちょっと何言ってるのかわからない
+function! fungo#28() abort
+  echo 'skip'
+endfunction
+
+" ちょっと何言ってるのかわからない
+function! fungo#29() abort
+  echo 'skip'
 endfunction
 
 function! fungo#all() abort
